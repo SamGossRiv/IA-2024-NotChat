@@ -20,7 +20,7 @@ dataset = pd.read_csv(
 print(dataset.head())
 
 # *** para prueba (BORRAR) 
-dataset = dataset.head(200) # Select the first 200 rows
+dataset = dataset.head(10000) # Select the first 200 rows
 print(dataset.shape)
 # 2. DATA PREPROCESSING
 
@@ -96,7 +96,7 @@ print('Model Summary', model.summary())
 model.fit(
     train_padded,
     np.array(train_labels),
-    epochs=100,
+    epochs=10,
     validation_data=(test_padded, np.array(test_labels)),
     verbose=2
 )
@@ -108,6 +108,7 @@ print(f'Accuracy: {accuracy}')
 
 # 5. IMPLEMENTATION
 # Function to predict the sentiment of a single text
+
 def predict_sentiment(text):
     # Tokenize and pad the text
     sequence = tokenizer.texts_to_sequences([text])
@@ -124,4 +125,12 @@ def predict_sentiment(text):
 # Example usage
 example_text = "The product was bad and I really hated it!"
 predicted_sentiment = predict_sentiment(example_text)
-print(f"The sentiment of the review is: {predicted_sentiment}")
+print(f"The sentiment of the review 1 is: {predicted_sentiment}")
+
+example_text2 = "The product was just ok and I liked it"
+predicted_sentiment2 = predict_sentiment(example_text2)
+print(f"The sentiment of the review 2 is: {predicted_sentiment2}")
+
+example_text3 = "The product was fine and I really loved it!"
+predicted_sentiment3 = predict_sentiment(example_text3)
+print(f"The sentiment of the review 3 is: {predicted_sentiment3}")
