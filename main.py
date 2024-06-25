@@ -1,13 +1,20 @@
 import numpy as np
 import pandas as pd
+import nltk
 import tensorflow as tf
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from sklearn.model_selection import train_test_split
 from huggingface_hub import hf_hub_download
 from tensorflow.keras.models import model_from_json
+import string
+
 # Downloading nltk corpus (first time only)
-#nltk.download('all')
+nltk.download('all')
+# Ensure stopwords are downloaded if not already
+nltk.download('stopwords')
+# Import the stopwords module
+from nltk.corpus import stopwords
 
 # 1. DATASET LOADING AND RECOLLECTION
 dataset = pd.read_csv(
@@ -15,8 +22,8 @@ dataset = pd.read_csv(
 )
 print(dataset.head())
 
-# *** para prueba (BORRAR)
-dataset = dataset.head(20000) # Select the first 200 rows
+# Trial
+dataset = dataset.head(40000)  # Select the first 20000 rows
 print(dataset.shape)
 
 # 2. DATA PREPROCESSING
@@ -24,11 +31,27 @@ print(dataset.shape)
 # Add a new column 'Sentiment' which is 'positive' if Score > 3, otherwise 'negative'
 dataset['Sentiment'] = dataset['Score'].apply(lambda x: 'positive' if x > 3 else 'negative')
 
-# Select relevant columns and drop missing values
+# Select only relevant columns and drop missing values
 dataset = dataset[['Text', 'Sentiment']].dropna()
 
 # Convert labels to binary
 dataset['Sentiment'] = dataset['Sentiment'].apply(lambda x: 1 if x == 'positive' else 0)
+
+# Download and prepare the stopwords
+stop_words = set(stopwords.words('english'))  # Now you can use stopwords
+
+
+# Function to remove stopwords from text
+def remove_stopwords(text):
+    text = text.lower()  # Convert text to lowercase
+    text = text.translate(str.maketrans('', '', string.punctuation))  # Remove punctuation
+    words = text.split()  # Split text into words
+    filtered_words = [word for word in words if word not in stop_words]  # Remove stopwords
+    return ' '.join(filtered_words)  # Join the words back into a single string
+
+
+# Remove stopwords from the text column
+dataset['Text'] = dataset['Text'].apply(remove_stopwords)
 
 # Split dataset into training and testing sets
 train_texts, test_texts, train_labels, test_labels = train_test_split(
@@ -51,28 +74,7 @@ test_padded = pad_sequences(test_sequences, maxlen=max_length, padding='post', t
 
 print(train_padded.shape)
 print(test_padded.shape)
-'''
-# create preprocess_text function
-def preprocess_text(text):
 
-    # Tokenize the text
-    tokens = word_tokenize(text.lower())
-
-   # Remove stop words
-    filtered_tokens = [token for token in tokens if token not in stopwords.words('english')]
-
-   # Lemmatize the tokens
-    lemmatizer = WordNetLemmatizer()
-    lemmatized_tokens = [lemmatizer.lemmatize(token) for token in filtered_tokens]
-
-    # Join the tokens back into a string
-    processed_text = ' '.join(lemmatized_tokens)
-    return processed_text
-
-# apply the function df
-dataset['Text'] = dataset['Text'].apply(preprocess_text)
-
-'''
 # 3. RNN MODEL (EMBEDDING, LSTM AND DENSE LAYERS)
 model = tf.keras.Sequential([
     tf.keras.layers.Embedding(input_dim=10000, output_dim=64, input_length=max_length),
@@ -96,7 +98,7 @@ print('Model Summary', model.summary())
 model.fit(
     train_padded,
     np.array(train_labels),
-    epochs=30,
+    epochs=20,
     validation_data=(test_padded, np.array(test_labels)),
     verbose=2
 )
