@@ -4,7 +4,7 @@ Requerimientos para correcto funcionamiento
 Instrucciones
 	Importar el repositorio completo
 	ingresar a la carpeta /dist
-	Ejecuar el .exe (se recomienda tener firewall o antivirus desactivados)
+	Ejecuar el setup_and_run.bat (se recomienda tener firewall o antivirus desactivados)
 
 by
 
