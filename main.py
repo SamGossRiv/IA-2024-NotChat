@@ -8,6 +8,7 @@ from sklearn.model_selection import train_test_split
 from huggingface_hub import hf_hub_download
 from tensorflow.keras.models import model_from_json
 import string
+import pickle #save the tokenizer
 
 # Downloading nltk corpus (first time only)
 nltk.download('all')
@@ -181,6 +182,10 @@ with open("sentiment_model.json", "w") as json_file:
 
 # Guardar los pesos del modelo en formato HDF5
 model.save_weights("sentiment_model_weights.weights.h5")
+
+# save the tokenizer to work on the page
+with open('tokenizer.pickle', 'wb') as handle:
+    pickle.dump(tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 # Cargar la arquitectura del modelo desde el archivo JSON
 with open('sentiment_model.json', 'r') as json_file:
